@@ -164,34 +164,43 @@ def printBoard(array):
             else:
                 print('  ', end="")
         print()
-def get(tetris_board, x,y):
-    if x == -1 or y == -1 :return 1
-    if x >= len(tetris_board) or y >= len(tetris_board[0]): return 1
-    return tetris_board[x][y]
 
 def scoreBoard(tetris_board,y):
-    score = 0
+    #Punish Holes
+    holes = 0
+    deep3 = 0
     #Punish higher move (change value)
-    score += ((h/b)-y)*100
-    Xiter = 0
+    height = ((h/b)-y)
+
+    tops = []
+    prev_height = h/b
+
     for column in tetris_board:
         found_block = False
-        Yiter = 0
+        i_c = h/b
         for item in column:
             if item == 0:
                 if found_block:
-                    #Punish Holes
-                    score+=1200
+                    holes += 1
             else:
-                if (not found_block)  and get(tetris_board, Xiter-1,Yiter-3) and get(tetris_board, Xiter+1,Yiter-3):
-                    score+=2000
+                if not found_block:
+                    tops.append(prev_height-i_c)
+                    prev_height = i_c
                 found_block = True
-            Yiter+=1
-        if (not found_block):
-            if get(tetris_board, Xiter-1,Yiter-3) and get(tetris_board, Xiter+1,Yiter-3):
-                score+=2000
-        Xiter+=1
-    return score
+            i_c-=1
+
+        if not found_block:
+            tops.append(prev_height-i_c)
+            prev_height = i_c
+
+
+
+    for i in range(0,len(tops)-1):
+        if tops[i]>=3 and tops[i+1]<=-3:
+            deep3+=1
+
+
+    return (holes*1200) + (2000*deep3) + (100*height)
 
 def executeMove(block_index):
     d__score = 4294967296
@@ -251,22 +260,15 @@ def clickTetris():
     move = executeMove(block_index)
 
     if holdmove != None and holdmove[0] < move[0]:
-        print('switch PLZZZZ')
         move = holdmove
         gui.press('c')
 
-    for i in range(move[1]):
-        gui.press('up')
-
-    gui.keyDown('left')
-    time.sleep(0.2)
-    gui.keyUp('left')    
-        
-    # for i in range(d__X):
+    gui.press('up', presses=move[1])
+    gui.press('left',presses=5)
     gui.press('right',presses=move[2])
 
     gui.press('space')
-    print(move[0], 'X: ', move[2], ' Rot:', move[1])
+    # print(move[0], 'X: ', move[2], ' Rot:', move[1])
 
 
 
@@ -282,4 +284,4 @@ if __name__ == "__main__":
     gui.press('c') 
     while True:
         clickTetris()
-        time.sleep(0.3)
+        time.sleep(0.1)
