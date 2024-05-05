@@ -134,7 +134,8 @@ block_colours = [
     (0xe3,0x9f,0x02),
     (0x59,0xb1,0x01),
     (0x0f,0x9b,0xd7),
-    (0x21,0x41,0xc6)
+    (0x21,0x41,0xc6),
+    (0x6a,0x6a,0x6a)
 ]
 
 
@@ -165,12 +166,17 @@ def printBoard(array):
                 print('  ', end="")
         print()
 
-def scoreBoard(tetris_board,y):
+def scoreBoard(tetris_board,x_end,y):
     #Punish Holes
     holes = 0
+    #Punish bumpiness and promote flatness
+    bump = 0
+    #Punish deep crevaces (3+ height) 
     deep3 = 0
     #Punish higher move (change value)
     height = ((h/b)-y)
+    #Punish end placement as they are for THICK TETRIS
+    end = int((w/b)==x_end)
 
     tops = []
     prev_height = h/b
@@ -194,19 +200,22 @@ def scoreBoard(tetris_board,y):
             prev_height = i_c
 
 
-
     for i in range(0,len(tops)-1):
+        bump += abs(tops[i])
         if tops[i]>=3 and tops[i+1]<=-3:
             deep3+=1
+    
+    bump += abs(tops[-1])
 
-
-    return (holes*1200) + (2000*deep3) + (100*height)
+    #Forget hitting tets when holes re there
+    if holes != 0:
+        end = 0
+    return (holes*1200) + (2000*deep3) + (100*height) + (10*bump) + (end*300)
 
 def executeMove(block_index):
     d__score = 4294967296
     d__X = -1
     d__rot = -1
-    print("Index:" ,block_index)
     
     rot_i = 0
     for block_rot in block_shapes[block_index]:
@@ -214,7 +223,7 @@ def executeMove(block_index):
         for dx, dy in positions:
             new_board = board.copy()
             new_board[dx:dx+block_rot.shape[0], dy:dy+block_rot.shape[1]] += block_rot
-            score = scoreBoard(new_board,dy)
+            score = scoreBoard(new_board,dx+block_rot.shape[0],dy)
             if d__score > score:
                 d__score = score
                 d__X = dx
@@ -266,9 +275,7 @@ def clickTetris():
     gui.press('up', presses=move[1])
     gui.press('left',presses=5)
     gui.press('right',presses=move[2])
-
     gui.press('space')
-    # print(move[0], 'X: ', move[2], ' Rot:', move[1])
 
 
 
@@ -279,9 +286,9 @@ def clickTetris():
 
 if __name__ == "__main__":
     gui.hotkey('alt','tab')
-    gui.press('f4') 
+    # gui.press('f4') 
     time.sleep(3)
     gui.press('c') 
     while True:
         clickTetris()
-        time.sleep(0.1)
+        # time.sleep(0.1)
