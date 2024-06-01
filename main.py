@@ -5,12 +5,12 @@ import time
 
 
 hold_x = 400
-hold_y = 340
+hold_y = 290
 hold_w = 1
 hold_h = 10
 
 x = 500
-y = 280
+y = 230
 w = 300
 h = 600
 
@@ -135,6 +135,7 @@ block_colours = [
     (0x59,0xb1,0x01),
     (0x0f,0x9b,0xd7),
     (0x21,0x41,0xc6),
+    (0x99,0x99,0x99),
     (0x6a,0x6a,0x6a)
 ]
 
@@ -237,6 +238,7 @@ def clickTetris():
     block_index = -1
 
     snapshot = ImageGrab.grab(bbox=(hold_x,hold_y,hold_w+hold_x,hold_h+hold_y))
+    snapshot.save("C:\\Users\\agnee\\OneDrive\\Desktop\\img.png")
     for hx in range(hold_w):    
         for hy in range(hold_h):
             colour = snapshot.getpixel((hx,hy))
@@ -245,6 +247,7 @@ def clickTetris():
 
 
     snapshot = ImageGrab.grab(bbox=(x,y,w+x,h+y))
+    snapshot.save("C:\\Users\\agnee\\OneDrive\\Desktop\\img1.png")
     cleaned = False
     for iy in range(hb,h,b):
         iY = int((iy-hb)/b)
@@ -266,21 +269,20 @@ def clickTetris():
     holdmove = None
     if hold_index != -1:
         holdmove = executeMove(hold_index)
-    move = executeMove(block_index)
+    else:
+        gui.press('c') 
 
-    if holdmove != None and holdmove[0] < move[0]:
-        move = holdmove
-        gui.press('c')
+    if block_index != len(block_colours)-2 and block_index != len(block_colours)-1:    
+        move = executeMove(block_index)
 
-    gui.press('up', presses=move[1])
-    gui.press('left',presses=5)
-    gui.press('right',presses=move[2])
-    gui.press('space')
+        if holdmove != None and holdmove[0] < move[0]:
+            move = holdmove
+            gui.press('c')
 
-
-
-
-
+        gui.press('up', presses=move[1])
+        gui.press('left',presses=5)
+        gui.press('right',presses=move[2])
+        gui.press('space')
 
 
 
